@@ -1,0 +1,40 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+
+class Item extends Model
+{
+    use HasFactory;
+
+    protected $fillable = [
+        'user_id', 'title', 'description', 'category', 'available'
+    ];
+
+    public function user() {
+        return $this->belongsTo(User::class);
+    }
+    
+    public function images() {
+        return $this->hasMany(ItemImage::class);
+    }
+    
+    public function reservations() {
+        return $this->hasMany(Reservation::class);
+    }
+    
+    public function notifications() {
+        return $this->hasMany(Notification::class);
+    }
+    
+    public function watchlistedBy() {
+        return $this->hasMany(Watchlist::class);
+    }
+    
+    public function sharedLinks() {
+        return $this->hasMany(SharedLink::class);
+    }
+    
+}
