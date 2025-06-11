@@ -10,7 +10,7 @@ class Item extends Model
     use HasFactory;
 
     protected $fillable = [
-        'user_id', 'title', 'description', 'category', 'available'
+        'user_id', 'title', 'description', 'category_id', 'available'
     ];
 
     public function user() {
@@ -36,5 +36,11 @@ class Item extends Model
     public function sharedLinks() {
         return $this->hasMany(SharedLink::class);
     }
-    
+
+    /**
+     * Relatie naar de categorie van dit item
+     */
+    public function category() {
+        return $this->belongsTo(Category::class);
+    }
 }

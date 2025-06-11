@@ -4,6 +4,7 @@ namespace Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
 use App\Models\User;
+use App\Models\Category;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Item>
@@ -17,12 +18,6 @@ class ItemFactory extends Factory
      */
     public function definition(): array
     {
-        $categories = [
-            'Elektronica', 'Huishouden', 'Kleding', 'Sport & Fitness', 
-            'Boeken', 'Meubels', 'Tuingereedschap', 'Speelgoed', 
-            'Auto-onderdelen', 'Muziekinstrumenten'
-        ];
-
         $itemTitles = [
             'Vintage fiets', 'Boormachine', 'Koffiezetapparaat', 'Laptop', 
             'Winterjas', 'Voetbal', 'Boekenkast', 'Kinderwagen', 
@@ -30,11 +25,15 @@ class ItemFactory extends Factory
             'Sneakers', 'Tennisracket', 'Bureau', 'Speelgoedauto'
         ];
 
+        // Gebruik een bestaande categorie of maak er een aan als er geen bestaan
+        $categoryId = Category::active()->inRandomOrder()->first()?->id 
+            ?? Category::factory()->create()->id;
+
         return [
             'user_id' => User::factory(),
             'title' => $this->faker->randomElement($itemTitles),
             'description' => $this->faker->paragraph(3),
-            'category' => $this->faker->randomElement($categories),
+            'category_id' => $categoryId,
             'available' => $this->faker->boolean(80), // 80% kans dat het beschikbaar is
         ];
     }
@@ -56,6 +55,16 @@ class ItemFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'available' => true,
+        ]);
+    }
+
+    /**
+     * Create item with specific category
+     */
+    public function withCategory(Category $category): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'category_id' => $category->id,
         ]);
     }
 } 

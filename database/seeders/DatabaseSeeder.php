@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Models\Item;
 use App\Models\ItemImage;
 use App\Models\Reservation;
+use App\Models\Category;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -22,7 +23,12 @@ class DatabaseSeeder extends Seeder
         Reservation::truncate();
         ItemImage::truncate();
         Item::truncate();
+        Category::truncate(); // Categorieën ook legen
         User::where('email', '!=', 'test@example.com')->delete(); // Behoud test gebruiker als deze al bestaat
+
+        // Seed categorieën eerst (vereist voor items)
+        $this->command->info('Categorieën seeden...');
+        $this->call(CategorySeeder::class);
 
         // Maak eerst een aantal gebruikers aan
         $users = User::factory(10)->create();
@@ -72,6 +78,7 @@ class DatabaseSeeder extends Seeder
             ->create();
 
         $this->command->info('Database seeding voltooid!');
+        $this->command->info('- ' . Category::count() . ' categorieën aangemaakt');
         $this->command->info('- ' . User::count() . ' gebruikers aangemaakt');
         $this->command->info('- ' . Item::count() . ' items aangemaakt');
         $this->command->info('- ' . ItemImage::count() . ' afbeeldingen aangemaakt');
