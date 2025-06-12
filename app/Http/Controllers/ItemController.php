@@ -18,6 +18,38 @@ class ItemController extends Controller
         return response()->json($items);
     }
 
+    /**
+     * Haal alle items van de ingelogde gebruiker op
+     */
+    public function myItems()
+    {
+        try {
+            $user = Auth::user();
+            if (!$user) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Gebruiker niet geauthenticeerd'
+                ], 401);
+            }
+
+            $items = Item::with(['images', 'reservations', 'category'])
+                ->where('user_id', $user->id)
+                ->orderBy('created_at', 'desc')
+                ->get();
+
+            return response()->json([
+                'success' => true,
+                'data' => $items
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Fout bij ophalen van items: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
     public function show($id)
     {
         $item = Item::with(['images', 'reservations', 'category'])->find($id);
@@ -236,6 +268,19 @@ class ItemController extends Controller
                     'success' => false,
                     'message' => 'Geen toestemming om dit item te verwijderen'
                 ], 403);
+            }
+
+            // Controleer of item een actieve reservering heeft
+            $heeftActieveReservering = $item->reservations()
+                ->whereIn('status', ['pending', 'confirmed'])
+                ->whereDate('end_date', '>=', now())
+                ->exists();
+
+            if ($heeftActieveReservering) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Item kan niet verwijderd worden, er is een lopende of aanstaande reservering.'
+                ], 409);
             }
 
             // Verwijder bijbehorende afbeeldingen van disk
