@@ -6,6 +6,15 @@ use App\Http\Controllers\ItemController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ReservationController;
 
+// Algemene OPTIONS route voor alle CORS preflight requests
+Route::options('/{any}', function () {
+    return response('', 200)
+        ->header('Access-Control-Allow-Origin', 'http://localhost:5173')
+        ->header('Access-Control-Allow-Credentials', 'true')
+        ->header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
+        ->header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept');
+})->where('any', '.*');
+
 // Publieke routes (geen authenticatie vereist)
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
@@ -38,7 +47,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/reservations/{id}/approve', [ReservationController::class, 'approve']);
     Route::post('/reservations/{id}/reject', [ReservationController::class, 'reject']);
     Route::delete('/reservations/{id}', [ReservationController::class, 'destroy']);
-    Route::get('/debug/reservations', [ReservationController::class, 'debug']); // Tijdelijk
 });
 
 
