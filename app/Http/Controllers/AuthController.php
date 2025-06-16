@@ -153,4 +153,32 @@ class AuthController extends Controller
             ]));
         }
     }
+
+    /**
+     * Update gebruikersprofiel (naam en locatie).
+     *
+     * @param  Request  $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function updateProfile(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'location_lat' => 'nullable|numeric|between:-90,90',
+            'location_lon' => 'nullable|numeric|between:-180,180',
+        ]);
+
+        $user = $request->user();
+        
+        $user->update([
+            'name' => $request->name,
+            'location_lat' => $request->location_lat,
+            'location_lon' => $request->location_lon,
+        ]);
+
+            return response()->json([
+            'message' => 'Profiel succesvol bijgewerkt',
+            'user' => $user->fresh()
+        ]);
+    }
 }

@@ -52,7 +52,7 @@ class ItemController extends Controller
 
     public function show($id)
     {
-        $item = Item::with(['images', 'reservations', 'category'])->find($id);
+        $item = Item::with(['images', 'reservations', 'category', 'user:id,location_lat,location_lon'])->find($id);
         
         if (!$item) {
             return response()->json(['message' => 'Item niet gevonden'], 404);
