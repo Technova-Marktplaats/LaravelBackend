@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Reservation;
 use App\Models\Item;
+use App\Models\Notification;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -140,6 +141,23 @@ class ReservationController extends Controller
                 'user_id'        => $user->id,
             ]);
 
+            // Verstuur notificatie naar eigenaar van het item
+            $eigenaar = $item->user;
+            if ($eigenaar && $eigenaar->id !== $user->id) {
+                Notification::create([
+                    'user_id' => $eigenaar->id,
+                    'item_id' => $item->id,
+                    'message' => "Er is een nieuwe reservering aangemaakt voor je item '{$item->title}' door {$user->name}.",
+                    'is_read' => false
+                ]);
+                
+                Log::info('Notificatie verstuurd naar eigenaar', [
+                    'eigenaar_id' => $eigenaar->id,
+                    'item_id' => $item->id,
+                    'reservation_id' => $reservation->id
+                ]);
+            }
+
             return response()->json([
                 'success'     => true,
                 'message'     => 'Reservering succesvol aangemaakt',
@@ -174,7 +192,7 @@ class ReservationController extends Controller
     }
 
     /**
-     * Verwijder een gecancelde reservering.
+     * Annuleer een pending reservering (alleen door aanvrager zelf).
      */
     public function destroy($id)
     {
@@ -197,30 +215,44 @@ class ReservationController extends Controller
             ], 404);
         }
 
-        // Controleer of gebruiker eigenaar is van item OF de lener is
-        $isOwner = $reservation->item->user_id === $user->id;
-        $isBorrower = $reservation->borrower_id === $user->id;
-
-        if (!$isOwner && !$isBorrower) {
+        // Alleen de aanvrager kan zijn eigen reservering annuleren
+        if ($reservation->borrower_id !== $user->id) {
             return response()->json([
                 'success' => false,
-                'message' => 'Geen toestemming om deze reservering te verwijderen',
+                'message' => 'Alleen de aanvrager kan zijn eigen reservering annuleren',
             ], 403);
         }
 
-        // Alleen gecancelde reserveringen kunnen verwijderd worden
-        if ($reservation->status !== 'cancelled') {
+        // Alleen pending reserveringen kunnen geannuleerd worden
+        if ($reservation->status !== 'pending') {
             return response()->json([
                 'success' => false,
-                'message' => 'Alleen gecancelde reserveringen kunnen verwijderd worden',
+                'message' => 'Alleen wachtende reserveringen kunnen geannuleerd worden',
             ], 409);
+        }
+
+        // Verstuur notificatie naar eigenaar dat reservering is geannuleerd
+        $eigenaar = $reservation->item->user;
+        if ($eigenaar) {
+            Notification::create([
+                'user_id' => $eigenaar->id,
+                'item_id' => $reservation->item_id,
+                'message' => "De reservering voor je item '{$reservation->item->title}' is geannuleerd door {$user->name}.",
+                'is_read' => false
+            ]);
+            
+            Log::info('Notificatie verstuurd naar eigenaar - annulering door aanvrager', [
+                'eigenaar_id' => $eigenaar->id,
+                'item_id' => $reservation->item_id,
+                'reservation_id' => $reservation->id
+            ]);
         }
 
         $reservation->delete();
 
         return response()->json([
             'success' => true,
-            'message' => 'Reservering succesvol verwijderd',
+            'message' => 'Reservering succesvol geannuleerd',
         ]);
     }
 
@@ -328,10 +360,44 @@ class ReservationController extends Controller
         if ($nieuweStatus === 'confirmed') {
             $reservation->item->update(['available' => false]);
             Log::info("Item {$reservation->item->id} ({$reservation->item->title}) niet meer beschikbaar na bevestiging reservatie {$reservation->id}");
+            
+            // Verstuur notificatie naar aanvrager dat reservatie is goedgekeurd
+            $aanvrager = $reservation->borrower;
+            if ($aanvrager) {
+                Notification::create([
+                    'user_id' => $aanvrager->id,
+                    'item_id' => $reservation->item_id,
+                    'message' => "Goed nieuws! Je reservering voor '{$reservation->item->title}' is goedgekeurd door de eigenaar.",
+                    'is_read' => false
+                ]);
+                
+                Log::info('Notificatie verstuurd naar aanvrager - goedgekeurd', [
+                    'aanvrager_id' => $aanvrager->id,
+                    'item_id' => $reservation->item_id,
+                    'reservation_id' => $reservation->id
+                ]);
+            }
         }
         
-        // Als reservatie wordt afgewezen, zorg dat item beschikbaar blijft
+        // Als reservatie wordt afgewezen, verstuur notificatie en verwijder reservatie
         if ($nieuweStatus === 'cancelled') {
+            // Verstuur notificatie naar aanvrager dat reservatie is afgewezen
+            $aanvrager = $reservation->borrower;
+            if ($aanvrager) {
+                Notification::create([
+                    'user_id' => $aanvrager->id,
+                    'item_id' => $reservation->item_id,
+                    'message' => "Je reservering voor '{$reservation->item->title}' is helaas afgewezen door de eigenaar.",
+                    'is_read' => false
+                ]);
+                
+                Log::info('Notificatie verstuurd naar aanvrager - afgewezen', [
+                    'aanvrager_id' => $aanvrager->id,
+                    'item_id' => $reservation->item_id,
+                    'reservation_id' => $reservation->id
+                ]);
+            }
+            
             // Controleer of er geen andere bevestigde reserveringen zijn voor dit item
             $andereBevestigdeReserveringen = Reservation::where('item_id', $reservation->item_id)
                 ->where('id', '!=', $reservation->id)
@@ -342,6 +408,18 @@ class ReservationController extends Controller
                 $reservation->item->update(['available' => true]);
                 Log::info("Item {$reservation->item->id} ({$reservation->item->title}) weer beschikbaar na afwijzing reservatie {$reservation->id}");
             }
+            
+            // Verwijder de afgewezen reservatie
+            $reservatieId = $reservation->id;
+            $itemTitel = $reservation->item->title;
+            $reservation->delete();
+            
+            Log::info("Afgewezen reservatie {$reservatieId} voor item '{$itemTitel}' verwijderd");
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'Reservering afgewezen en verwijderd',
+            ]);
         }
 
         return response()->json([

@@ -50,6 +50,7 @@ class CheckVerlopenReservaties extends Command
         
         $verzondenNotificaties = 0;
         $itemsGeupdatet = 0;
+        $reservatiesVerwijderd = 0;
         
         foreach ($verlopenReservaties as $reservatie) {
             // Zet item weer op beschikbaar
@@ -94,13 +95,20 @@ class CheckVerlopenReservaties extends Command
                 }
             }
             
-            // Update reservatie status naar 'expired' (we moeten eerst de migratie aanpassen)
-            // Voor nu laten we de status op 'confirmed' maar kunnen we later een 'expired' status toevoegen
+            // Verwijder de verlopen reservatie
+            $reservatieId = $reservatie->id;
+            $reservatieTitel = $reservatie->item->title;
+            $reservatie->delete();
+            $reservatiesVerwijderd++;
+            
+            $this->info("Verlopen reservatie voor '{$reservatieTitel}' verwijderd");
+            Log::info("Verlopen reservatie {$reservatieId} voor item '{$reservatieTitel}' verwijderd");
         }
         
         $this->info("Totaal {$verzondenNotificaties} notificatie(s) verstuurd.");
         $this->info("Totaal {$itemsGeupdatet} item(s) weer beschikbaar gesteld.");
-        Log::info("CheckVerlopenReservaties command voltooid - {$verzondenNotificaties} notificaties verstuurd, {$itemsGeupdatet} items weer beschikbaar gesteld");
+        $this->info("Totaal {$reservatiesVerwijderd} verlopen reservatie(s) verwijderd.");
+        Log::info("CheckVerlopenReservaties command voltooid - {$verzondenNotificaties} notificaties verstuurd, {$itemsGeupdatet} items weer beschikbaar gesteld, {$reservatiesVerwijderd} reservaties verwijderd");
         $this->info('Controle voltooid!');
     }
 }

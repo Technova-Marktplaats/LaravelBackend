@@ -34,7 +34,7 @@ class ItemFactory extends Factory
             'title' => $this->faker->randomElement($itemTitles),
             'description' => $this->faker->paragraph(3),
             'category_id' => $categoryId,
-            'available' => $this->faker->boolean(80), // 80% kans dat het beschikbaar is
+            'available' => true, // 80% kans dat het beschikbaar is
         ];
     }
 
