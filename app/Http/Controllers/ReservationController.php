@@ -324,6 +324,26 @@ class ReservationController extends Controller
         $reservation->status = $nieuweStatus;
         $reservation->save();
 
+        // Als reservatie wordt bevestigd, zet item op niet beschikbaar
+        if ($nieuweStatus === 'confirmed') {
+            $reservation->item->update(['available' => false]);
+            Log::info("Item {$reservation->item->id} ({$reservation->item->title}) niet meer beschikbaar na bevestiging reservatie {$reservation->id}");
+        }
+        
+        // Als reservatie wordt afgewezen, zorg dat item beschikbaar blijft
+        if ($nieuweStatus === 'cancelled') {
+            // Controleer of er geen andere bevestigde reserveringen zijn voor dit item
+            $andereBevestigdeReserveringen = Reservation::where('item_id', $reservation->item_id)
+                ->where('id', '!=', $reservation->id)
+                ->where('status', 'confirmed')
+                ->exists();
+            
+            if (!$andereBevestigdeReserveringen) {
+                $reservation->item->update(['available' => true]);
+                Log::info("Item {$reservation->item->id} ({$reservation->item->title}) weer beschikbaar na afwijzing reservatie {$reservation->id}");
+            }
+        }
+
         return response()->json([
             'success'     => true,
             'message'     => 'Status succesvol bijgewerkt',

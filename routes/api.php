@@ -5,6 +5,8 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ItemController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ReservationController;
+use App\Http\Controllers\WatchlistController;
+use App\Http\Controllers\NotificationController;
 
 // Algemene OPTIONS route voor alle CORS preflight requests
 Route::options('/{any}', function () {
@@ -48,6 +50,17 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/reservations/{id}/approve', [ReservationController::class, 'approve']);
     Route::post('/reservations/{id}/reject', [ReservationController::class, 'reject']);
     Route::delete('/reservations/{id}', [ReservationController::class, 'destroy']);
+
+
+    //Watchlist Routes
+    Route::post('/watchlist/{id}/add', [WatchlistController::class, 'add']);
+    Route::post('/watchlist/{id}/remove', [WatchlistController::class, 'remove']);
+
+    // Notificatie Routes
+    Route::get('/notifications', [NotificationController::class, 'index']);
+    Route::put('/notifications/{id}/read', [NotificationController::class, 'markAsRead']);
+    Route::put('/notifications/read-all', [NotificationController::class, 'markAllAsRead']);
+    Route::get('/notifications/unread-count', [NotificationController::class, 'getUnreadCount']);
 });
 
 

@@ -58,7 +58,21 @@ class ItemController extends Controller
             return response()->json(['message' => 'Item niet gevonden'], 404);
         }
         
-        return response()->json($item);
+        // Controleer of huidige gebruiker dit item op watchlist heeft
+        $user = Auth::user();
+        $opWatchlist = false;
+        
+        if ($user) {
+            $opWatchlist = \App\Models\Watchlist::where('user_id', $user->id)
+                ->where('item_id', $id)
+                ->exists();
+        }
+        
+        // Voeg de boolean toe aan het item object
+        $itemArray = $item->toArray();
+        $itemArray['op_watchlist'] = $opWatchlist;
+        
+        return response()->json($itemArray);
     }
 
     public function store(Request $request)
