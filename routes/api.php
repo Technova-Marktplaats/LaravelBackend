@@ -36,6 +36,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/items', [ItemController::class, 'index']);
     Route::get('/items/my-items', [ItemController::class, 'myItems']);
     Route::get('/items/{id}', [ItemController::class, 'show']);
+    Route::get('/items/{id}/share-link', [ItemController::class, 'getShareLink']);
     Route::post('/items', [ItemController::class, 'store']);
     Route::put('/items/{id}', [ItemController::class, 'update']);
     Route::delete('/items/{id}', [ItemController::class, 'destroy']);

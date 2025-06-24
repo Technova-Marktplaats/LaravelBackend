@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 
 class ItemController extends Controller
 {
@@ -374,6 +375,58 @@ class ItemController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Fout bij verwijderen afbeelding: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Haal share link op of maak een nieuwe aan
+     */
+    public function getShareLink($id)
+    {
+        try {
+            $item = Item::find($id);
+            if (!$item) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Item niet gevonden'
+                ], 404);
+            }
+
+            // Controleer of de ingelogde gebruiker eigenaar is
+            $user = Auth::user();
+            if (!$user || $item->user_id !== $user->id) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Geen toestemming om dit item te delen'
+                ], 403);
+            }
+
+            // Als er al een share_link is, geef die terug
+            if ($item->share_link) {
+                return response()->json([
+                    'success' => true,
+                    'share_link' => $item->share_link,
+                    'share_url' => $item->share_url,
+                    'message' => 'Bestaande share link gevonden'
+                ]);
+            }
+
+            // Anders maak een nieuwe share link aan
+            $shareToken = Str::uuid()->toString();
+            $item->update(['share_link' => $shareToken]);
+
+            return response()->json([
+                'success' => true,
+                'share_link' => $shareToken,
+                'share_url' => url('/shared/' . $shareToken),
+                'message' => 'Share link aangemaakt'
+            ], 201);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Fout bij ophalen/aanmaken share link: ' . $e->getMessage()
             ], 500);
         }
     }

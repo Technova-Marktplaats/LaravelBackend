@@ -10,8 +10,10 @@ class Item extends Model
     use HasFactory;
 
     protected $fillable = [
-        'user_id', 'title', 'description', 'category_id', 'available'
+        'user_id', 'title', 'description', 'category_id', 'available', 'share_link'
     ];
+
+    protected $appends = ['share_url'];
 
     public function user() {
         return $this->belongsTo(User::class);
@@ -42,5 +44,13 @@ class Item extends Model
      */
     public function category() {
         return $this->belongsTo(Category::class);
+    }
+
+    /**
+     * Accessor voor de volledige share URL
+     */
+    public function getShareUrlAttribute()
+    {
+        return $this->share_link ? url('/shared/' . $this->share_link) : null;
     }
 }
