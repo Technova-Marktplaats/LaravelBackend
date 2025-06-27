@@ -108,6 +108,30 @@ class AuthController extends Controller
     }
 
     /**
+     * Bepaal de juiste frontend URL op basis van de request bron.
+     *
+     * @param  Request  $request
+     * @return string
+     */
+    private function getFrontendUrl(Request $request)
+    {
+        $host = $request->getHost();
+        
+        // Controleer of we op localhost draaien
+        if (in_array($host, ['localhost', '127.0.0.1', '::1'])) {
+            return 'http://localhost:5173/api/auth';
+        }
+        
+        // Voor productie omgeving - bepaal frontend URL op basis van backend host
+        if (str_contains($host, 'srv856957.hstgr.cloud')) {
+            return 'https://srv856957.hstgr.cloud/api/auth'; // Pas dit aan naar je frontend URL
+        }
+        
+        // Fallback naar localhost
+        return 'http://localhost:5173';
+    }
+
+    /**
      * Verwerk de callback van Google en redirect naar frontend.
      *
      * @param  Request  $request
@@ -135,8 +159,10 @@ class AuthController extends Controller
 
             $token = $user->createToken('auth_token')->plainTextToken;
 
+            $frontendUrl = $this->getFrontendUrl($request);
+
             // Redirect naar frontend met success data
-            return redirect('http://localhost:5173/auth/callback?' . http_build_query([
+            return redirect($frontendUrl . '/auth/callback?' . http_build_query([
                 'success' => 'true',
                 'token' => $token,
                 'user' => base64_encode(json_encode([
@@ -146,8 +172,10 @@ class AuthController extends Controller
                 ]))
             ]));
         } catch (\Throwable $e) {
+            $frontendUrl = $this->getFrontendUrl($request);
+            
             // Redirect naar frontend met error
-            return redirect('http://localhost:5173/auth/callback?' . http_build_query([
+            return redirect($frontendUrl . '/auth/callback?' . http_build_query([
                 'success' => 'false',
                 'error' => 'Er is een fout opgetreden bij het inloggen met Google'
             ]));
