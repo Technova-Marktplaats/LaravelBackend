@@ -119,12 +119,12 @@ class AuthController extends Controller
         
         // Controleer of we op localhost draaien
         if (in_array($host, ['localhost', '127.0.0.1', '::1'])) {
-            return 'http://localhost:5173/api/auth';
+            return 'http://localhost:5173/api/';
         }
         
         // Voor productie omgeving - bepaal frontend URL op basis van backend host
         if (str_contains($host, 'srv856957.hstgr.cloud')) {
-            return 'https://srv856957.hstgr.cloud/api/auth'; // Pas dit aan naar je frontend URL
+            return 'https://srv856957.hstgr.cloud/api/'; // Pas dit aan naar je frontend URL
         }
         
         // Fallback naar localhost
@@ -162,7 +162,7 @@ class AuthController extends Controller
             $frontendUrl = $this->getFrontendUrl($request);
 
             // Redirect naar frontend met success data
-            return redirect($frontendUrl . '/auth/callback?' . http_build_query([
+            return redirect($frontendUrl . '/auth/google/callback?' . http_build_query([
                 'success' => 'true',
                 'token' => $token,
                 'user' => base64_encode(json_encode([
@@ -175,7 +175,7 @@ class AuthController extends Controller
             $frontendUrl = $this->getFrontendUrl($request);
             
             // Redirect naar frontend met error
-            return redirect($frontendUrl . '/auth/callback?' . http_build_query([
+            return redirect($frontendUrl . '/auth/google/callback?' . http_build_query([
                 'success' => 'false',
                 'error' => 'Er is een fout opgetreden bij het inloggen met Google'
             ]));
