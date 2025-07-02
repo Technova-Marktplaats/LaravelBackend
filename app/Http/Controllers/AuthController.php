@@ -175,7 +175,7 @@ class AuthController extends Controller
             $frontendUrl = $this->getFrontendUrl($request);
             
             // Redirect naar frontend met error
-            return redirect($frontendUrl . '/auth/google/callback?' . http_build_query([
+            return redirect($frontendUrl . 'auth/google/callback?' . http_build_query([
                 'success' => 'false',
                 'error' => 'Er is een fout opgetreden bij het inloggen met Google'
             ]));
