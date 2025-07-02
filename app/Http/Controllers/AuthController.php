@@ -162,7 +162,7 @@ class AuthController extends Controller
             $frontendUrl = $this->getFrontendUrl($request);
 
             // Redirect naar frontend met success data
-            return redirect($frontendUrl . '/auth/google/callback?' . http_build_query([
+            return redirect($frontendUrl . 'auth/google/callback?' . http_build_query([
                 'success' => 'true',
                 'token' => $token,
                 'user' => base64_encode(json_encode([

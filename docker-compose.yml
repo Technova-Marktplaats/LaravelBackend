@@ -1,0 +1,43 @@
+services:
+  app:
+    build: .
+    container_name: laravel_app
+    restart: unless-stopped
+    volumes:
+      - .:/var/www          # broncode (optioneel readonly maken in prod)
+    environment:
+      APP_ENV: production
+      APP_DEBUG: "false"
+      DB_HOST: db
+      DB_DATABASE: marktplaats
+      DB_USERNAME: willem
+      DB_PASSWORD: pass123
+    depends_on:
+      - db
+
+  web:
+    image: nginx:alpine
+    container_name: laravel_web
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    volumes:
+      - .:/var/www
+      - ./docker/nginx/conf.d:/etc/nginx/conf.d:ro
+    depends_on:
+      - app
+
+  db:
+    image: mysql:8
+    container_name: laravel_db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: gDz+ngKhNKI3Jr7fSK.1
+      MYSQL_DATABASE: marktplaats
+      MYSQL_USER: willem
+      MYSQL_PASSWORD: pass123
+    volumes:
+      - dbdata:/var/lib/mysql
+
+volumes:
+  dbdata:

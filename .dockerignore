@@ -1,0 +1,16 @@
+#
+# Docker build context uitsluitingen
+#
+# Symlink die problemen veroorzaakt op Windows
+public/storage
+
+# Node modules / front-end build caches
+node_modules
+
+# Laravel caches
+storage/framework
+storage/logs
+
+# Git, tests, docs
+.git
+vendor 
