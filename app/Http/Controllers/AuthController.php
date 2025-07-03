@@ -128,7 +128,7 @@ class AuthController extends Controller
         }
         
         // Fallback naar localhost
-        return 'http://localhost:5173';
+        return 'http://localhost:5173/api/';
     }
 
     /**

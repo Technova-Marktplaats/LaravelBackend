@@ -46,7 +46,7 @@ class DatabaseSeeder extends Seeder
         $allUsers = $users->push($testUser);
 
         // Maak items aan met bestaande gebruikers
-        $items = Item::factory(10)
+        $items = Item::factory(100)
             ->recycle($allUsers) // Hergebruik alle gebruikers inclusief test gebruiker
             ->create();
 

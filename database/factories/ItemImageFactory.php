@@ -19,11 +19,31 @@ class ItemImageFactory extends Factory
     {
         // Realistische placeholder images voor verschillende categorieën
         $imageUrls = [
-            'https://picsum.photos/400/300?random=' . $this->faker->numberBetween(1, 1000),
-            'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=400&h=300&fit=crop',
-            'https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=400&h=300&fit=crop',
-            'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=400&h=300&fit=crop',
-            'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400&h=300&fit=crop',
+            'https://picsum.photos/400/300?random=' . $this->faker->numberBetween(1, 10000),
+            'https://picsum.photos/400/300?random=' . $this->faker->numberBetween(1, 10000),
+            'https://picsum.photos/400/300?random=' . $this->faker->numberBetween(1, 10000),
+            'https://picsum.photos/400/300?random=' . $this->faker->numberBetween(1, 10000),
+            'https://picsum.photos/400/300?random=' . $this->faker->numberBetween(1, 10000),
+            'https://picsum.photos/400/300?random=' . $this->faker->numberBetween(1, 10000),
+            'https://picsum.photos/400/300?random=' . $this->faker->numberBetween(1, 10000),
+            'https://picsum.photos/400/300?random=' . $this->faker->numberBetween(1, 10000),
+            'https://picsum.photos/400/300?random=' . $this->faker->numberBetween(1, 10000),
+            'https://picsum.photos/400/300?random=' . $this->faker->numberBetween(1, 10000),
+            'https://picsum.photos/400/300?random=' . $this->faker->numberBetween(1, 10000),
+            'https://picsum.photos/400/300?random=' . $this->faker->numberBetween(1, 10000),
+            'https://picsum.photos/400/300?random=' . $this->faker->numberBetween(1, 10000),
+            'https://picsum.photos/400/300?random=' . $this->faker->numberBetween(1, 10000),
+            'https://picsum.photos/400/300?random=' . $this->faker->numberBetween(1, 10000),
+            'https://picsum.photos/400/300?random=' . $this->faker->numberBetween(1, 10000),
+            'https://picsum.photos/400/300?random=' . $this->faker->numberBetween(1, 10000),
+            'https://picsum.photos/400/300?random=' . $this->faker->numberBetween(1, 10000),
+            'https://picsum.photos/400/300?random=' . $this->faker->numberBetween(1, 10000),
+            'https://picsum.photos/400/300?random=' . $this->faker->numberBetween(1, 10000),
+            'https://picsum.photos/400/300?random=' . $this->faker->numberBetween(1, 10000),
+            'https://picsum.photos/400/300?random=' . $this->faker->numberBetween(1, 10000),
+            'https://picsum.photos/400/300?random=' . $this->faker->numberBetween(1, 10000),
+            'https://picsum.photos/400/300?random=' . $this->faker->numberBetween(1, 10000),
+            'https://picsum.photos/400/300?random=' . $this->faker->numberBetween(1, 10000),
         ];
 
         return [
